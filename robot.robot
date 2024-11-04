@@ -1,6 +1,7 @@
 *** Settings ***
 Library    RPA.Excel.Files
 Library    Collections
+Library    OperatingSystem
 
 *** Variables ***
 ${FILE1_PATH}     path/to/your/File1.xlsx
@@ -53,3 +54,13 @@ Get Column Values
         Append To List    ${column_values}    ${value}
     END
     [Return]    ${column_values}
+
+Convert To Set
+    [Arguments]    ${list}
+    ${set}=    Evaluate    set(${list})    # Converts list to set using Python's set function
+    [Return]    ${set}
+
+Set Difference
+    [Arguments]    ${set1}    ${set2}
+    ${difference}=    Evaluate    ${set1} - ${set2}
+    [Return]    ${difference}
