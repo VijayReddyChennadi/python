@@ -6,8 +6,7 @@ Library    Collections
 ${FILE1_PATH}     path/to/your/File1.xlsx
 ${FILE2_PATH}     path/to/your/File2.xlsx
 ${SHEET_NAME}     Sheet1
-${COLUMN1}        A     # Column to compare in File1
-${COLUMN2}        A     # Column to compare in File2
+${COLUMN_NAME}    ColumnA    # The header name of the column you want to compare
 
 *** Test Cases ***
 Compare Columns in Two Excel Files
@@ -15,13 +14,19 @@ Compare Columns in Two Excel Files
     
     # Open the first file and get the column data
     Open Workbook    ${FILE1_PATH}
-    ${file1_data}=    Read Column Values    ${SHEET_NAME}    ${COLUMN1}
+    ${file1_table}=    Read Worksheet As Table    ${SHEET_NAME}
     Close Workbook
+
+    # Extract the column data by the column header
+    @{file1_data}=    Get Column Values    ${file1_table}    ${COLUMN_NAME}
 
     # Open the second file and get the column data
     Open Workbook    ${FILE2_PATH}
-    ${file2_data}=    Read Column Values    ${SHEET_NAME}    ${COLUMN2}
+    ${file2_table}=    Read Worksheet As Table    ${SHEET_NAME}
     Close Workbook
+
+    # Extract the column data by the column header
+    @{file2_data}=    Get Column Values    ${file2_table}    ${COLUMN_NAME}
 
     # Convert both columns to sets for easy comparison
     ${file1_set}=    Convert To Set    ${file1_data}
@@ -38,3 +43,13 @@ Compare Columns in Two Excel Files
     # Optionally, add validation steps to check if they are the same
     Should Be Empty    ${missing_in_file2}    msg=Some values from File1 are missing in File2
     Should Be Empty    ${missing_in_file1}    msg=Some values from File2 are missing in File1
+
+*** Keywords ***
+Get Column Values
+    [Arguments]    ${table}    ${column_name}
+    ${column_values}=    Create List
+    FOR    ${row}    IN    @{table}
+        ${value}=    Get From Dictionary    ${row}    ${column_name}
+        Append To List    ${column_values}    ${value}
+    END
+    [Return]    ${column_values}
